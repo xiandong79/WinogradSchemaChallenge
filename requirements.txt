@@ -1,0 +1,7 @@
+nltk>=3.2.5
+numpy>=1.13.2
+sklearn>=0.0
+scipy>=0.18.1
+six>=1.10.0
+subprocess32>=3.2.7
+beautifulsoup4>=0.0
