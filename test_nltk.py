@@ -1,13 +1,18 @@
-import nltk, os, sys
+import nltk
+import os
+import sys
 
 from nltk.tokenize import word_tokenize
 
-def makeTags(sent):
+
+def make_tags(sent):
     result = word_tokenize(sent)
     # print result
     return nltk.pos_tag(result)
 
-tags = makeTags("The city councilmen refused the demonstrators a permit because they feared violence.")
+
+tags = make_tags(
+    "The city councilmen refused the demonstrators a permit because they feared violence.")
 # print tags
 # print tags[1][0]
 # print tags[1][1]

@@ -6,38 +6,41 @@
 
 import re
 import os
-import contextlib                                                                                                                                                               
-from urllib2 import Request, urlopen                                                                                                                                        
-import urllib                                                                                                                                                               
+import contextlib
+from urllib2 import Request, urlopen
+import urllib
 import xml.etree.ElementTree
-from bs4 import BeautifulSoup   
+from bs4 import BeautifulSoup
 
-def bing_search(sentence):      
-                                                                                                                                                                                                                                                                                        
-    url = "http://www.bing.com/search?q=%s" % urllib.quote_plus(sentence)   
-    reponse = Request(url)                                                                                                                                                   
-    reponse.add_header('User-Agent', 'Mozilla/5.0 (Macintosh; Intel Mac OS X x.y; rv:42.0) Gecko/20100101 Firefox/42.0')                               
-    bing_response = urlopen(reponse).read()    
 
-    soup = BeautifulSoup(bing_response, 'html.parser')                                                                                                                                           
-    count = soup.find('div', id='b_tween').text    
+def bing_search(sentence):
+
+    url = "http://www.bing.com/search?q=%s" % urllib.quote_plus(sentence)
+    reponse = Request(url)
+    reponse.add_header(
+        'User-Agent', 'Mozilla/5.0 (Macintosh; Intel Mac OS X x.y; rv:42.0) Gecko/20100101 Firefox/42.0')
+    bing_response = urlopen(reponse).read()
+
+    soup = BeautifulSoup(bing_response, 'html.parser')
+    count = soup.find('div', id='b_tween').text
     contextlib.closing(bing_response)
-    
+
     return int(re.sub("[^0-9]", "", count))
 
+
 def bing_answer():
-    corrected = 0 
+    corrected = 0
     answerbybing = []
 
-    for i in range(size): # size = 279 
+    for i in range(size):  # size = 279
         question0 = choice0[i] + " " + sent2[i]
         count0 = bing_search(question0)
-        #print question0
-        #print count0
+        # print question0
+        # print count0
         question1 = choice1[i] + " " + sent2[i]
         count1 = bing_search(question1)
-        #print question1
-        #print count1
+        # print question1
+        # print count1
 
         if count0 > count1:
             # print choice0[i]
@@ -53,8 +56,9 @@ def bing_answer():
 
     return corrected
 
+
 if __name__ == '__main__':
-    
+
     print("==== Now, task beginning!!! ====")
 
     sentences = []
@@ -75,7 +79,7 @@ if __name__ == '__main__':
     size = 0
 
     for schema in xml_data.findall('schema'):
-        
+
         # replas = ('.', ''), ('.', ''), ('a', ''), ('an', ''), ('the', '')
         replas = ('.', ''), ('.', ''), ('the', '')
 
@@ -83,8 +87,10 @@ if __name__ == '__main__':
         sent2.append(schema[0][2].text.lower().strip())
         prons.append(schema[0][1].text)
 
-        c0 = reduce(lambda a, kv: a.replace(*kv), replas, schema[2][0].text.lower().strip())
-        c1 = reduce(lambda a, kv: a.replace(*kv), replas, schema[2][1].text.lower().strip())
+        c0 = reduce(lambda a, kv: a.replace(*kv), replas,
+                    schema[2][0].text.lower().strip())
+        c1 = reduce(lambda a, kv: a.replace(*kv), replas,
+                    schema[2][1].text.lower().strip())
 
         choice0.append(c0)
         choice1.append(c1)
@@ -93,7 +99,7 @@ if __name__ == '__main__':
         if ans == 'A':
             answer.append(c0)
         else:
-            answer.append(c1)   
+            answer.append(c1)
 
         sentences.append(sent1[size] + ' ' + prons[size] + ' ' + sent2[size])
 
@@ -105,7 +111,7 @@ if __name__ == '__main__':
     # print len(choice0)
     # print choice0[70]
     # print len(answer)
-    print "The total number of queations is: ", len(sentences)
+    print "The total number of questions is: ", len(sentences)
 
     accuracy = float(bing_answer()) / size * 100
 

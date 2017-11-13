@@ -14,48 +14,58 @@ from nltk.tokenize import word_tokenize
 from sklearn import svm
 
 # make tags for each sentence
-def makeTags(sentence):
+
+
+def make_tags(sentence):
     text = word_tokenize(sentence)
     return nltk.pos_tag(text)
 
-# define the tags 
+
+# define the tags
 DETERMINER = ['DT']
 VERBS = ['VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ']
 ADJECTIVE = ['JJ', 'JJR', 'JJS']
 NEGATION = ["n't", 'not']
 
-def isVerb(tup):
+
+def is_verb(tup):
     for v in VERBS:
         if tup[1] == v:
             return v
     return False
 
-def isAdj(tup):
+
+def is_adj(tup):
     for a in ADJECTIVE:
         if tup[1] == a:
             return a
     return False
 
-def isNegative(tup):
+
+def is_negative(tup):
     if tup[1] == 'RB':
         for ne in NEGATION:
             if tup[0] == ne:
                 return True
     return False
 
-def isNegativeFromList(word_list):
+
+def is_negative_from_list(word_list):
     for t in word_list:
-        if isNegative(t):
+        if is_negative(t):
             return True
     return False
 
-def isDeter(tup):
+
+def is_deter(tup):
     for d in DETERMINER:
         if tup[1] == d:
             return d
     return False
 
 # get the similarity of two key word extracted from two clauses seperately
+
+
 def get_sim_value(word1, word2):
     synsets1 = wordnet.synsets(word1)
     synsets2 = wordnet.synsets(word2)
@@ -75,38 +85,40 @@ def get_sim_value(word1, word2):
     # print float(sim_value) / count
     return float(sim_value) / count
 
-# extract feature vector for one sentence/question 
+# extract feature vector for one sentence/question
+
+
 def extract_feature(sentence1, sentence2):
-    
-    sent1_tags = makeTags(sentence1)
-    sent2_tags = makeTags(sentence2)
-        
+
+    sent1_tags = make_tags(sentence1)
+    sent2_tags = make_tags(sentence2)
+
     for v in sent1_tags[::-1]:
-        if isVerb(v):
+        if is_verb(v):
             s1_v = v[0]
             break
-        else: 
-            s1_v = "COMP5211" # as a filler 
+        else:
+            s1_v = "COMP5211"  # as a filler
 
     for adj in sent1_tags[::-1]:
-        if isAdj(adj):
+        if is_adj(adj):
             s1_j = adj[0]
             break
-        else: 
+        else:
             s1_j = "COMP5211"
-                
+
     for v in sent2_tags[::-1]:
-        if isVerb(v):
+        if is_verb(v):
             s2_v = v[0]
             break
-        else: 
+        else:
             s2_v = "COMP5211"
 
     for adj in sent2_tags[::-1]:
-        if isAdj(adj):
+        if is_adj(adj):
             s2_j = adj[0]
             break
-        else: 
+        else:
             s2_j = "COMP5211"
 
     sim_s1_v_s2_v = get_sim_value(s1_v, s2_v)
@@ -118,18 +130,19 @@ def extract_feature(sentence1, sentence2):
     sim_s1_j_s2_v = get_sim_value(s1_j, s2_v)
 
     sent1_positive = 1
-    if isNegativeFromList(sent1_tags):
+    if is_negative_from_list(sent1_tags):
         sent1_positive = -1
 
     sent2_positive = 1
-    if isNegativeFromList(sent2_tags):
+    if is_negative_from_list(sent2_tags):
         sent2_positive = -1
 
     return [sim_s1_v_s2_v, sim_s1_j_s2_j, sim_s1_v_s2_j, sim_s1_j_s2_v, sent1_positive, sent2_positive]
 
+
 # main + read input data
 if __name__ == '__main__':
-    
+
     print("==== Now, task beginning!!! ====")
 
     sentences = []
@@ -151,7 +164,7 @@ if __name__ == '__main__':
     size = 0
 
     for schema in xml_data.findall('schema'):
-        
+
         # replas = ('.', ''), ('.', ''), ('a', ''), ('an', ''), ('the', '')
         replas = ('.', ''), ('.', ''), ('the', '')
 
@@ -159,8 +172,10 @@ if __name__ == '__main__':
         sent2.append(schema[0][2].text.lower().strip())
         prons.append(schema[0][1].text)
 
-        c0 = reduce(lambda a, kv: a.replace(*kv), replas, schema[2][0].text.lower().strip())
-        c1 = reduce(lambda a, kv: a.replace(*kv), replas, schema[2][1].text.lower().strip())
+        c0 = reduce(lambda a, kv: a.replace(*kv), replas,
+                    schema[2][0].text.lower().strip())
+        c1 = reduce(lambda a, kv: a.replace(*kv), replas,
+                    schema[2][1].text.lower().strip())
 
         choice0.append(c0)
         choice1.append(c1)
@@ -169,15 +184,15 @@ if __name__ == '__main__':
         if ans == 'A':
             answer.append(1)
         else:
-            answer.append(-1)   
+            answer.append(-1)
 
         sentences.append(sent1[size] + ' ' + prons[size] + ' ' + sent2[size])
 
         size += 1
 
-    print "==== The total number of queations is: ", len(sentences), " ===="
+    print "==== The total number of questions is: ", len(sentences), " ===="
     print "Start training model..."
-    
+
     total = len(sentences)
     train_size = 200
     train_feature = []
@@ -212,5 +227,5 @@ if __name__ == '__main__':
         if test_answer[i] == answer[i + train_size]:
             correct += 1
 
-    print "Accuracy of Answered by Bing Search Engine: ", float(correct) / test_size * 100,  "%"
+    print "Accuracy of SVM/machine learning: ", float(correct) / test_size * 100,  "%"
     print("==== Task finished, this is the last line! ====")
