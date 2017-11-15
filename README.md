@@ -126,7 +126,15 @@ $ pip install -U nltk
 $ pip install -r requirements.txt 
 ```
 
-If you prefer a pure and isolated python environment, 
+If you prefer a pure and isolated python environment like me, you can use `virtualenv`.
+
+```bash
+$ pip install virtualenv
+$ virtualenv XXX-workspace
+$ source  XXX-workspace/bin/activate
+
+# Then, install all python libraries and execute all code.
+```
 
 ### 1.3.2. Input data
 
